@@ -115,9 +115,9 @@ def computer_memory(path2folder):
     mem_stats['mem_cached'] = stats[5]
     mem_stats['buf/cach_used'] = stats[6]
     mem_stats['buf/cach_free'] = stats[7]
-    mem_stats['swap_total'] = stats[8]
-    mem_stats['swap_used'] = stats[9]
-    mem_stats['swap_free'] = stats[10]
+    #mem_stats['swap_total'] = stats[8]
+    #mem_stats['swap_used'] = stats[9]
+    #mem_stats['swap_free'] = stats[10]
     memfile.close()
     return mem_stats
 
@@ -509,6 +509,105 @@ def visappend(s_q, r_q, cpu):
 		
 		r_q.put(picklenamedict)
 
+
+
+def visappend2():
+    # Find visstart and visend:
+    totntimescans = len(visnumdict.values()[1])
+    if timeperpage >= totntimescans:
+        visstart = 0
+        visend = totntimescans
+        timeblock = np.atleast_2d([visstart, visend])
+    if timeperpage < totntimescans:
+        timeblock = []
+        pagetimelist = getpagetimelist(totntimescans,timeperpage)
+        for starttime in pagetimelist:
+            visstart = starttime
+            visend = starttime+(timeperpage-1)
+            if visend > totntimescans:
+               visend = totntimescans	 
+            timeblock.append([visstart, visend])
+
+    # Initialize arrays and output files
+    vis_array = {}
+    vis_output = {}
+    times_output = {}
+    time_count = {}   # Number of times that have been appended. Individual counter for baseline, st, IF
+    current = {}      # Current time block
+    print 'Reading labels and naming output files'
+    for baseline in baselines:
+        for tblock in timeblock:
+            labeltime = '{}_{}-{}'.format(baseline, tblock[0], tblock[1])
+            time_count[baseline] = 0
+            current[baseline] = 0
+            timesarrayname = 'timesarray_'+labeltime+'.npy'
+            try:
+                os.remove(picklepath+'/'+timesarrayname)
+            except:
+                pass
+            times_output[labeltime] = open(picklepath+'/'+timesarrayname, "ab")
+            for st in stokes:
+                for IF in xrange(IF_start-1,IF_end):
+                    label = '{}_{}_{}-{}_{}'.format(baseline, st, tblock[0], tblock[1], IF+1)
+                    # Arrays
+                    vis_array[label] = np.zeros(shape=(nchan))
+                    # Output files
+                    visarrayname = label+'.npy'
+                    try:
+                        os.remove(picklepath+'/'+visarrayname)
+                    except:
+                        pass
+                    vis_output[label] = open(picklepath+'/'+visarrayname, "ab")
+    # Iterate over all visibilities and write to corresponding output file
+    print 'Populating vis_arrays'
+    for row in wizdata:
+        baseline = '{}-{}'.format(row.baseline[0], row.baseline[1])
+        if baseline != '1-2':
+            if (row.source in sourceidlist) and (baseline in baselines):
+                curvisarray = row.visibility
+                tblock = timeblock[current[baseline]]
+                labeltime = '{}_{}-{}'.format(baseline, tblock[0], tblock[1])
+                if (time_count[baseline] >= tblock[1]):
+                    current[baseline] += 1
+                np.save(times_output[labeltime], round(float(row.time),6))
+                time_count[baseline] += 1
+                for st in stokes:
+                    for IF in xrange(IF_start-1,IF_end):
+                        label = '{}_{}_{}-{}_{}'.format(baseline, st, tblock[0], tblock[1], IF+1)
+                        if amporphas == 'P':
+                            vis_array[label] = np.where(curvisarray[IF,:,polnames[st]][:,2] > 0.0, (360./(2*pi))*arctan2(curvisarray[IF,:,polnames[st]][:,1], curvisarray[IF,:,polnames[st]][:,0]), float('NaN'))
+                        if amporphas == 'A':
+                            vis_array[label] = np.where(curvisarray[IF,:,polnames[st]][:,2] > 0.0,(np.sqrt((curvisarray[IF,:,polnames[st]][:,0])**2 + (curvisarray[IF,:,polnames[st]][:,1])**2)), float('NaN'))
+                        # Flag data
+                        if do_loadflag == 'yes':
+        		    flagfile = str(baseline)+"_"+str(st)+"_"+str(visstart)+"-"+str(visend)+'_'+str(IF+1)+'_flags.npy'
+        		    flags = np.load(path2folder+flagfile)
+                            vis_array[np.where(flags > 0)] = float('NaN')
+                            del flags
+                            os.remove(path2folder+flagfile)
+                        # Save visibilities
+                        np.save(vis_output[label], vis_array[label])
+     
+    print 'Finished reading FITS file'                       
+    for f in vis_output.values():
+        f.close()
+    for f in times_output.values():
+        f.close()
+
+
+
+def read_vis(filename):
+    # Read multiple arrays stored in .npy files and concatenate them into a single array
+    data1 = []
+    fp = open(filename, 'rb')
+    while 1:
+       try:
+          data1.append(np.load(fp))
+       except:
+          break
+    return np.asfarray(data1)
+
+
 ########################################################################################
 ### Makespplot function - a third and final parallelised function that runs per page. It
 ### first reads in the picklefile of the visibility array and creates a plot of it using
@@ -523,21 +622,25 @@ def makespplot(s_q,r_q,cpu):
 			ifpagelist = value
 			jobnumber = key
 		
-		temparray = pkle.load(open(picklepath+'/'+ifpagelist[0], "rb"))
+		#temparray = pkle.load(open(picklepath+'/'+ifpagelist[0], "rb"))
+		temparray = read_vis(picklepath+'/'+ifpagelist[0])
 		novis = len(temparray)
 		temparray = [] 
 
 		plotarray = np.zeros(shape=(noIFs,novis,nchan))
-
 		for IF in xrange(noIFs):
 			print "Reading in array:", ifpagelist[IF]
-			singleifarray = pkle.load(open(picklepath+'/'+ifpagelist[IF], "rb"))
+			#singleifarray = pkle.load(open(picklepath+'/'+ifpagelist[IF], "rb"))
+			singleifarray = read_vis(picklepath+'/'+ifpagelist[IF])
 			plotarray[IF,:,:] = singleifarray[:,:]
 			os.remove(picklepath+'/'+ifpagelist[IF])
-
-		timesfile = ifpagelist[0].replace(' ','')[:-4].upper()
-		times_array = pkle.load(open(picklepath+'/timesarray_'+str(timesfile)+'.p'))
-		os.remove(picklepath+'/timesarray_'+str(timesfile)+'.p')
+		#timesfile = ifpagelist[0].replace(' ','')[:-4].upper()
+		#times_array = pkle.load(open(picklepath+'/timesarray_'+str(timesfile)+'.p'))
+                tbsl = ifpagelist[0].split('_')[0]
+                tblk = ifpagelist[0].split('_')[2]
+		timesfile = 'timesarray_'+'_'.join([tbsl,tblk])+'.npy'
+		times_array = read_vis(picklepath+'/'+timesfile)
+		#os.remove(picklepath+'/'+timesfile)
 
 		tmp = getyticks(wizdata,times_array,sourceidlist)
 		yticks = tmp[0]
@@ -549,7 +652,7 @@ def makespplot(s_q,r_q,cpu):
 		datatype = amporphas
 		yticklist = yticks
 
-		tmpname = plfname.replace(' ','')[:-4].upper()
+		tmpname = plfname.replace(' ','')[:-6].upper()
 		print "Creating SPPlot of page: ", tmpname, "on CPU:", (cpu+1)
 
 		fig1 = figure()
@@ -702,7 +805,7 @@ def makespplot(s_q,r_q,cpu):
 			bsl = plfname[:3]
 			stoke = plfname[4:6]
 			
-			comb_name = plfname.replace(' ','')[:-4].upper()
+			comb_name = plfname.replace(' ','')[:-6].upper()
 			comb_name = 'combined_'+str(comb_name)+'.png'		
 			combnamedict = {jobnumber:str(comb_name)}
 			fig_comb.savefig(path2folder+comb_name, bbox_inches = 'tight')
@@ -779,7 +882,7 @@ def makespplot(s_q,r_q,cpu):
 			if scale == 'linear' and scale_over_all_IFs == 'no':
 				righthandtext = 'Linear Scale: IFs scaled independantly'
 			
-			plfname = plfname.replace(' ','')[:-4].upper()
+			plfname = plfname.replace(' ','')[:-6].upper()
 			plfname = str(outfilename)+'_'+str(plfname)+str(pltype)
 			
 			fig1.text(0.98,0.5, righthandtext, rotation='vertical', verticalalignment='center',fontsize=fsize)
@@ -894,6 +997,7 @@ wizdata = WizAIPSUVData(Name, Klass, Disk, Seq)
 try:
 	os.mkdir(picklepath)
 except OSError:
+	os.system('rm '+picklepath+'/*')
 	pass
 
 # Figure out number of Stokes and polarizations
@@ -1137,9 +1241,9 @@ if 'mem_total' in mem_stats:
     print "Total Memory  :    %s" % array_size(mem_stats['mem_total']*1000)
     print "Used Memory   :    %s" % array_size(mem_stats['mem_used']*1000)
     print "Free Memory   :    %s" % array_size(mem_stats['mem_free']*1000)
-    print "Total Swap    :    %s" % array_size(mem_stats['swap_total']*1000)
-    print "Used Swap     :    %s" % array_size(mem_stats['swap_used']*1000)
-    print "Free Swap     :    %s" % array_size(mem_stats['swap_free']*1000)
+    #print "Total Swap    :    %s" % array_size(mem_stats['swap_total']*1000)
+    #print "Used Swap     :    %s" % array_size(mem_stats['swap_used']*1000)
+    #print "Free Swap     :    %s" % array_size(mem_stats['swap_free']*1000)
 
 
 ### The predicted array sizes, these predict the arrays when spplotting all baselines simultaneously
@@ -1254,64 +1358,68 @@ if do_loadflag == 'yes':
 ### visappend function
 ##############################################################################################
 
-joblist = []
-jobnumber = 1
+#joblist = []
+#jobnumber = 1
+#
+#for baseline, visnumarray in visnumdict.items():
+#	totntimescans = len(visnumarray)
+#	for st in stokes:
+#		if timeperpage >= totntimescans:
+#			numofjobs = noIFs*nostokes*nbline
+#						
+#			visstart = 0
+#			visend = totntimescans
+#			
+#			for IF in xrange(IF_start-1,IF_end):
+#				joblist.append([Name,Klass,Disk,Seq,visstart,visend,baseline,IF,polnames,st,nchan,sourceidlist,jobnumber,visnumarray])
+#				jobnumber += 1
+#
+#		if timeperpage < totntimescans:
+#			pagetimelist = getpagetimelist(totntimescans,timeperpage)
+#			numofjobs = len(pagetimelist)*noIFs*nostokes*nbline
+#			
+#			for starttime in pagetimelist:
+#				visstart = starttime
+#				visend = starttime+(timeperpage-1)
+#				if visend > totntimescans:
+#					visend = totntimescans	 
+#				
+#				visnumarray2 = visnumarray[visstart:visend]
+#				
+#				for IF in xrange(IF_start-1,IF_end):
+#					joblist.append([Name,Klass,Disk,Seq,visstart,visend,baseline,IF,polnames,st,nchan,sourceidlist,jobnumber,visnumarray2])
+#					jobnumber += 1
+#
+#
+#send_q = mp.Queue()
+#recv_q = mp.Queue()
+#ncpus = mp.cpu_count()
+#
+#for i in xrange(len(joblist)):
+#	#print "Sending Job #%.i of %.i to Queue" % ((i+1), len(joblist))
+#	send_q.put(joblist[i])
+#
+#for cpu in xrange(ncpus):
+#	proc = mp.Process(target=visappend, args=(send_q,recv_q,cpu))
+#	proc.start()
+#	#print 'Starting process on CPU: %.i' % (cpu+1)
+#
+#resultsdict = []
+#for i in xrange(len(joblist)):
+#	resultsdict.append(recv_q.get())
+#
+#for i in xrange(ncpus):
+#	send_q.put('STOP')
+#
+#resultsdict.sort()
+#
+#results = []
+#for i in xrange(1,len(resultsdict)+1):
+#	results.append((resultsdict[(i-1)])[i])
+#
 
-for baseline, visnumarray in visnumdict.items():
-	totntimescans = len(visnumarray)
-	for st in stokes:
-		if timeperpage >= totntimescans:
-			numofjobs = noIFs*nostokes*nbline
-						
-			visstart = 0
-			visend = totntimescans
-			
-			for IF in xrange(IF_start-1,IF_end):
-				joblist.append([Name,Klass,Disk,Seq,visstart,visend,baseline,IF,polnames,st,nchan,sourceidlist,jobnumber,visnumarray])
-				jobnumber += 1
+visappend2()
 
-		if timeperpage < totntimescans:
-			pagetimelist = getpagetimelist(totntimescans,timeperpage)
-			numofjobs = len(pagetimelist)*noIFs*nostokes*nbline
-			
-			for starttime in pagetimelist:
-				visstart = starttime
-				visend = starttime+(timeperpage-1)
-				if visend > totntimescans:
-					visend = totntimescans	 
-				
-				visnumarray2 = visnumarray[visstart:visend]
-				
-				for IF in xrange(IF_start-1,IF_end):
-					joblist.append([Name,Klass,Disk,Seq,visstart,visend,baseline,IF,polnames,st,nchan,sourceidlist,jobnumber,visnumarray2])
-					jobnumber += 1
-
-
-send_q = mp.Queue()
-recv_q = mp.Queue()
-ncpus = mp.cpu_count()
-
-for i in xrange(len(joblist)):
-	#print "Sending Job #%.i of %.i to Queue" % ((i+1), len(joblist))
-	send_q.put(joblist[i])
-
-for cpu in xrange(ncpus):
-	proc = mp.Process(target=visappend, args=(send_q,recv_q,cpu))
-	proc.start()
-	#print 'Starting process on CPU: %.i' % (cpu+1)
-
-resultsdict = []
-for i in xrange(len(joblist)):
-	resultsdict.append(recv_q.get())
-
-for i in xrange(ncpus):
-	send_q.put('STOP')
-
-resultsdict.sort()
-
-results = []
-for i in xrange(1,len(resultsdict)+1):
-	results.append((resultsdict[(i-1)])[i])
 
 print "\nTime taken to read and pickle visibilities (hh:mm:ss):", time2hms(time.time()-ti)
 print 'Finished on %s' % strftime("%d-%b-%y"), 'at:', strftime("%H:%M:%S", localtime()),'\n'
@@ -1321,6 +1429,10 @@ print 'Finished on %s' % strftime("%d-%b-%y"), 'at:', strftime("%H:%M:%S", local
 ### Section 2: A 2nd paralellised section to read in picklefiles and combine IFs into one array which is
 ### then spploted out onto one page...
 #########################################################################################################
+
+import re
+results = [f for f in os.listdir(picklepath) if re.search(r'(^[0-9]).*\.npy', f)]
+results.sort()
 
 numofpages = len(results)/noIFs
 pageslist = []
@@ -1489,6 +1601,9 @@ if onlyplotcombined == 'no':
 	results = results[::-1]
 
 	mergepdfs(results)
+
+
+os.remove(picklepath)
 
 print "\nTime taken to complete SPPlot (hh:mm:ss):", time2hms(time.time()-ti)
 print 'Finished on %s' % strftime("%d-%b-%y"), 'at:', strftime("%H:%M:%S", localtime()),'\n'
