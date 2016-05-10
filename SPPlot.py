@@ -1602,8 +1602,10 @@ if onlyplotcombined == 'no':
 
 	mergepdfs(results)
 
-
-os.remove(picklepath)
+try:
+    os.system('rm -r '+picklepath)
+except:
+    pass
 
 print "\nTime taken to complete SPPlot (hh:mm:ss):", time2hms(time.time()-ti)
 print 'Finished on %s' % strftime("%d-%b-%y"), 'at:', strftime("%H:%M:%S", localtime()),'\n'
