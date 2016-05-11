@@ -919,8 +919,9 @@ if len(sys.argv) > 1:
         print '\nThis is SPPlot %s dated: %s\n' % (version_number, version_date)
         sys.exit(0)
     else:
-        print 'ERROR: unrecognised option'
-        sys.exit(0)
+        inputfile = sys.argv[1]
+else:
+    inputfile = "SPPlot_input.py"
 
 
 print '\n Started running SPPlot version: %s (%s)' % (version_number, version_date), 'on %s' % strftime("%d-%b-%y"), 'at:', strftime("%H:%M:%S", localtime()),'\n'
@@ -929,11 +930,8 @@ print '\n Started running SPPlot version: %s (%s)' % (version_number, version_da
 #### Section to retrieve information about the dataset and load inputs from input file!
 #######################################################################################
 
-try:
-    execfile("SPPlot_input.py")
-    print "\nYour AIPS USER NUMBER is: ", AIPS.userno
-except:
-    print "\n Could not find input file!"
+print "\nYour input file is: ", inputfile
+print "Your AIPS USER NUMBER is: ", AIPS.userno
 
 try:
 	AIPS.userno
