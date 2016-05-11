@@ -329,6 +329,26 @@ def sortcomb_pages(ntimescans,combimagelist):
 
 	return pagedictionary, timeranglist
 
+##### generate custom colormap
+
+import matplotlib.colors as col
+
+def anglecolormap(): 
+    # Generate colormap for angles (180 = -180).
+    #white = '#ffffff'
+    #black = '#000000'
+    #red = '#ff0000'
+    #green = '#00ff00'
+    blue = '#5555dd'
+    black = '#555555'
+    red = '#ebc5c5'
+    green = '#81cc81'
+    anglemap = col.LinearSegmentedColormap.from_list(
+        'anglemap', [black, green, red,  black], N=256, gamma=1)
+    return anglemap
+
+anglemap = anglecolormap()
+
 ##########################################################################
 # Load in a flag table multiprocess function - original by Danielle Fenech
 # editted by Jack Morford for use within SPPlot...
@@ -674,6 +694,8 @@ def makespplot(s_q,r_q,cpu):
 			cmapchoice = cm.summer
 		elif colourscheme == 'winter':
 			cmapchoice = cm.winter
+		elif colourscheme == 'anglemap':
+			cmapchoice = anglemap
 		else:
 			cmapchoice = cm.jet
 
