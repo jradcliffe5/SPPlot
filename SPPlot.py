@@ -844,7 +844,7 @@ def makespplot(s_q,r_q,cpu):
 				xlabelminmax = "Channels \n Min: %.1g \n Max: %.1g \n (Jy)" % (minim[count-1],maxim[count-1])
 				tmp.set_xlabel(xlabelminmax, fontsize=fsize)
 				tmp.set_ylabel('Observation Time', fontsize=fsize)
-				tmp.set_title("IF "+str(IFs)+": "+str('%.2f' % flagpercent[IFs-1])+"% Flags", fontsize=(fsize-1))
+				tmp.set_title("IF "+str(selected_IFs[IFs-1])+": "+str('%.2f' % flagpercent[IFs-1])+"% Flags", fontsize=(fsize-1))
 				tmp.set_xticks(xtck)
 				tmp.set_xticklabels(xtckl,fontsize=fsize*0.75)
 				tmp.set_yticks(yticklist)
@@ -1237,6 +1237,7 @@ visnumdict = collections.OrderedDict(sorted(visnumdict.items()))
 nostokes = len(stokes)
 nbline = len(baselines)
 noIFs = (IF_end-IF_start)+1
+selected_IFs = range(IF_start, IF_end+1)
 orderedpols = get_ordered_pols(uvdata)
 
 if ntime == 0:
