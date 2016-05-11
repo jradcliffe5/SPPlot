@@ -437,7 +437,7 @@ def visappend(s_q, r_q, cpu):
 		appending_count = 0
 		vis_count = 0
 
-		print "---> Appending Visibilities on CPU:",(cpu+1),"for Bsl:",baseline, "Stoke:",st, "IF:",IF+1, "Timerange:",visstart,"-",visend
+		print "---> Appending Visibilities on CPU: {0:2d}".format(cpu+1),"for Bsl:",baseline, "Stoke:",st, "IF:",IF+1, "Timerange:",visstart,"-",visend
 				
 		if choosesources == 'all':
 			for vis in visnumarray:
@@ -929,6 +929,8 @@ print '\n Started running SPPlot version: %s (%s)' % (version_number, version_da
 #######################################################################################
 #### Section to retrieve information about the dataset and load inputs from input file!
 #######################################################################################
+
+execfile(inputfile)
 
 print "\nYour input file is: ", inputfile
 print "Your AIPS USER NUMBER is: ", AIPS.userno
