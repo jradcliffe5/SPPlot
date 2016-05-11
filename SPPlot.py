@@ -177,7 +177,9 @@ def time24(t):
 	min  = (hour - floor(hour))*60
 	sec  = round((min - floor(min))*60,0)
 
-	return str(str(int(day))+':'+str(int(hour))+':'+str(int(min))+':'+str(int(sec)))
+	#return str(str(int(day))+':'+str(int(hour))+':'+str(int(min))+':'+str(int(sec)))
+	return '{0}/{1:02d}:{2:02d}:{3:02d}'.format(int(day), int(hour), int(min), int(sec))
+
 
 def hms2dectime(time):
 
@@ -534,7 +536,7 @@ def visappend2():
     times_output = {}
     time_count = {}   # Number of times that have been appended. Individual counter for baseline, st, IF
     current = {}      # Current time block
-    print 'Reading labels and naming output files'
+    print '\nReading labels and naming output files'
     for baseline in baselines:
         for tblock in timeblock:
             labeltime = '{}_{}-{}'.format(baseline, tblock[0], tblock[1])
@@ -795,7 +797,7 @@ def makespplot(s_q,r_q,cpu):
 				comb.yaxis.set_ticklabels([], visible=False)
 				comb.set_xticks(xtck)
 				comb.set_yticks(yticklist)
-				comb.plot([0,len(thisarray[0][0])],[yticklist,yticklist], color ='black', linewidth=1.0, linestyle="--")
+				comb.plot([0,len(thisarray[0][0])],[yticklist,yticklist], color ='black', linewidth=0.8, linestyle="-")
 
 				if count > 1:
 					comb.get_yaxis().set_visible(False)
@@ -847,7 +849,7 @@ def makespplot(s_q,r_q,cpu):
 				tmp.set_xticklabels(xtckl,fontsize=fsize*0.75)
 				tmp.set_yticks(yticklist)
 				tmp.set_yticklabels(ylabels,fontsize=fsize*0.85)
-				plot([0,len(thisarray[0][0])],[yticklist,yticklist], color ='black', linewidth=1.0, linestyle="--")
+				plot([0,len(thisarray[0][0])],[yticklist,yticklist], color ='black', linewidth=0.5, linestyle="-")
 				if count > 1:
 					tmp.get_yaxis().set_visible(False)
 				count += 1
@@ -1544,7 +1546,7 @@ if makecombinedplot == 'yes':
 				stk = 'cross'
 
 			antennas = np.unique(np.asarray([baselines_i.split('-') for baselines_i in baselines]).flatten())
-			fig2 = plt.figure(figsize=(20,20))
+			fig2 = plt.figure(figsize=(32,32))
 			fig2.subplots_adjust(wspace=0.00, hspace=0.00)
 
 			numofant = len(antennas)
@@ -1565,8 +1567,8 @@ if makecombinedplot == 'yes':
 			        temp_RR.set_yticks([])
 			        temp_LL.set_yticks([])
 
-			        temp_RR.set_frame_on(True)
-			        temp_LL.set_frame_on(True)
+			        temp_RR.set_frame_on(False)
+			        temp_LL.set_frame_on(False)
 
 			        if i==0: 
 			            temp_RR.set_ylabel('%s Ant %s' % (r, antennas[j]), rotation=90)
