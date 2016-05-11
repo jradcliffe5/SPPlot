@@ -1110,24 +1110,36 @@ if choosebaselines == 'all':
 	# List of baselines. Note that this uses the actual visibility data to find the antenna numbers 
 	# and doesn't assume they start at 1 and increase linearly by the same amount. This has been written
 	# because the VLA and early commissioning e-MERLIN data have a unique numbering system.
+    #baselines = []
+    #for vis in wizdata:
+    #	tmptime = vis.time
+    #	if tmptime < starttimerange:
+    #		continue
+    #	if tmptime > endtimerange:
+    #		break
+    #	else:
+    #            bline = "%i-%i" % (vis.baseline[0], vis.baseline[1])
+    #            if vis.baseline[0] == vis.baseline[1]:
+    #            	continue
+    #            if bline not in baselines:
+    #                baselines.append(str(bline))
+    #            elif len(baselines) == nacbase:
+    #                break
+    #for bline in baselines:
+    #	if bline == '1-2':
+    #		del baselines[baselines.index(bline)]
+    antennas = []
+    antab = uvdata.table('AN',1)
+    for row in antab:
+        antennas.append(row['nosta'])
     baselines = []
-    for vis in wizdata:
-    	tmptime = vis.time
-    	if tmptime < starttimerange:
-    		continue
-    	if tmptime > endtimerange:
-    		break
-    	else:
-	        bline = "%i-%i" % (vis.baseline[0], vis.baseline[1])
-	        if vis.baseline[0] == vis.baseline[1]:
-	        	continue
-	        if bline not in baselines:
-	            baselines.append(str(bline))
-	        elif len(baselines) == nacbase:
-	            break
+    for i in range(len(antennas)):
+        for j in range(i+1, len(antennas)):
+            baselines.append('{0}-{1}'.format(antennas[i], antennas[j]))
     for bline in baselines:
-    	if bline == '1-2':
-    		del baselines[baselines.index(bline)]
+        if bline == '1-2':
+            del baselines[baselines.index(bline)]
+
     print "\n ALL %s baselines have been selected for spplotting..." % len(baselines)
 
     ntimescans = {}
