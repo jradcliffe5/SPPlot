@@ -1610,7 +1610,7 @@ if onlyplotcombined == 'no':
 	### Merge pages into one .pdf file...
 	print "\nReady to Merge pages..."
 
-	results = results[::-1]
+	results = results
 
 	mergepdfs(results)
 
