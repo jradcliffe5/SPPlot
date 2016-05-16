@@ -27,8 +27,8 @@
 #			 specific timerange (J.Morford), option to read in flag table attached to data (original function written by
 #			 DMF for use within SERPent, adapted by J.Morford to work within SPPlot).
 # May 2016 - Version 1.3: re-writing of visappend function (now visaapend2) - now only reads the fits file once to save memory issues
-#			for those using smaller machines whilst considerably speeding up the programme, changes made by J.Moldon. Further
-# 			minor changes made by J.Moldon - see github commits for details.
+#			 for those using smaller machines whilst considerably speeding up the programme, changes made by J.Moldon. Further
+# 			 minor changes made by J.Moldon - see github commits for details.
 
 ### Intructions for use are found in the input file - email jmorford@star.ucl.ac.uk for bugs/issues/questions
 
