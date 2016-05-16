@@ -7,7 +7,7 @@
 #########################################
 
 #########################################
-### SPPlot ############## Version: 270416
+### SPPlot ############## Version: 160516
 #########################################
 #################### Author: Jack Morford
 #########################################
@@ -21,13 +21,18 @@
 ### The core plotting routines have been adapted from PLOT_LIB routines written by Hans-Rainer Klockner.
 
 ### Updates:
-# Oct 2014 - Version 1.0: original (JM)
-# Feb 2015 - Version 1.1: major upgrades, parallelised for machines with multiple CPUs using pythons multiprocessing module (JM)
+# Oct 2014 - Version 1.0: original (J.Morford)
+# Feb 2015 - Version 1.1: major upgrades, parallelised for machines with multiple CPUs using pythons multiprocessing module (J.Morford)
 # Apr 2016 - Version 1.2: addition of combined plots (thanks go to Javier Moldon for this idea and piece of code), option to plot
-#			 specific timerange (JM), option to read in flag table attached to data (original function written by
-#			 DMF for use within SERPent, adapted by JM to work within SPPlot).
+#			 specific timerange (J.Morford), option to read in flag table attached to data (original function written by
+#			 DMF for use within SERPent, adapted by J.Morford to work within SPPlot).
+# May 2016 - Version 1.3: re-writing of visappend function (now visaapend2) - now only reads the fits file once to save memory issues
+#			for those using smaller machines whilst considerably speeding up the programme, changes made by J.Moldon. Further
+# 			minor changes made by J.Moldon - see github commits for details.
 
 ### Intructions for use are found in the input file - email jmorford@star.ucl.ac.uk for bugs/issues/questions
+
+# Type " parseltongue SPPlot.py --version " - for version information.
 
 #########################################
 #########################################
@@ -935,8 +940,8 @@ def makespplot(s_q,r_q,cpu):
 #######################################################################################
 ### Main Code #########################################################################
 
-version_number = '1.2'
-version_date = "27/04/16"
+version_number = '1.3'
+version_date = "16/05/16"
 
 if len(sys.argv) > 1:
     if sys.argv[1] == '--v' or sys.argv[1] == '--version':
