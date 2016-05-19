@@ -1,8 +1,8 @@
 ######################################
 ### SPPlot input file ################ 
-######################### Version: 1.3
+######################### Version: 1.2
 ######################################
-###################### Dated: 16/05/16
+###################### Dated: 27/04/16
 ######################################
 ################# Author: Jack Morford
 ######################################
@@ -13,9 +13,9 @@
 # FIRST - if chosen, it will read in one or more flag tables and dump these out as
 # numpy arrays (load_in_flags function originally written by Danielle Fenech).
 # SECOND - it will append the visibilities into arrays (per IF, per baseline, per stokes,
-# per timeperpage) and match the flag array to the visibility array if one is present
-# before saving (with numpy.save) this array into the picklepath directory...
-# THIRD - it will read in the numpy arrays in parrallel, collating each IF together
+# per timeperpage) in parallel and match the flag array to the visibility array if one is
+# present before pickle'ing this array into the picklepath directory...
+# THIRD - it will read in the pickle files again in parrallel, collating each IF together
 # into an array fit for one spplot page, and physically spplot each page using matlibplot
 # routines within the makespplot function.
 # FOURTH - it merges all the pages into one .pdf file and/or creates a single 'combined'
