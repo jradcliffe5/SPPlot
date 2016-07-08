@@ -824,7 +824,7 @@ def makespplot(s_q,r_q,cpu):
 				comb.yaxis.set_ticklabels([], visible=False)
 				comb.set_xticks(xtck)
 				comb.set_yticks(yticklist)
-				comb.plot([0,len(thisarray[0][0])],[yticklist,yticklist], color ='black', linewidth=0.8, linestyle="-")
+				comb.plot([0,len(thisarray[0][0])],[yticklist,yticklist], color ='black', linewidth=0.8, linestyle="-", alpha = 0.5)
 
 				if count > 1:
 					comb.get_yaxis().set_visible(False)
@@ -876,7 +876,7 @@ def makespplot(s_q,r_q,cpu):
 				tmp.set_xticklabels(xtckl,fontsize=fsize*0.75)
 				tmp.set_yticks(yticklist)
 				tmp.set_yticklabels(ylabels,fontsize=fsize*0.85)
-				plot([0,len(thisarray[0][0])],[yticklist,yticklist], color ='black', linewidth=0.5, linestyle="-")
+				plot([0,len(thisarray[0][0])],[yticklist,yticklist], color ='black', linewidth=0.5, linestyle="-", alpha = 0.5)
 				if count > 1:
 					tmp.get_yaxis().set_visible(False)
 				count += 1
@@ -1631,9 +1631,12 @@ if makecombinedplot == 'yes':
 			        	continue
 	        
 
-			combinedpagename = outfilename+'_'+timeranglist[page-1]+'_'+str(stk)+'_combined.pdf'
-			fig2.savefig(path2folder+combinedpagename, bbox_inches='tight')
-			print '\nCombined plot saved to: ', path2folder+combinedpagename
+                        combinedpagename1 = outfilename+'_'+timeranglist[page-1]+'_'+str(stk)+'_combined.pdf'
+                        combinedpagename2 = outfilename+'_'+timeranglist[page-1]+'_'+str(stk)+'_combined.png'
+                        fig2.savefig(path2folder+combinedpagename1, bbox_inches='tight')
+                        fig2.savefig(path2folder+combinedpagename2, bbox_inches='tight')
+                        print '\nCombined plot saved to: ', path2folder+combinedpagename1
+                        print '\nCombined plot saved to: ', path2folder+combinedpagename2
 
 
 if onlyplotcombined == 'no':
