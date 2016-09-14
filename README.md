@@ -13,4 +13,4 @@ Files include:
 
 To run, (parsetongue must be installed...) in the command line type: % parseltongue SPPlot.py
 
-Most recent version: SPPlot 1.3 2  Dated:  14/09/16
+Most Recent Version: SPPlot 1.3.2 Dated: 14/09/16
