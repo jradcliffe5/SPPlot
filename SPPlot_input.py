@@ -1,11 +1,11 @@
-######################################
-### SPPlot input file ################ 
-######################### Version: 1.3
-######################################
-###################### Dated: 16/05/16
-######################################
-################# Author: Jack Morford
-######################################
+########################################
+### SPPlot input file ##################
+######################### Version: 1.3.2
+########################################
+###################### Dated: 14/09/16 #
+########################################
+################# Author: Jack Morford #
+########################################
 
 ### SPPlot follows a 'simple' routine. It read in your visibilities, stores them in 
 # numpy arrays, and plots the data on 3D plot of frequency x time x amplitude/phase.
@@ -13,8 +13,8 @@
 # FIRST - if chosen, it will read in one or more flag tables and dump these out as
 # numpy arrays (load_in_flags function originally written by Danielle Fenech).
 # SECOND - it will append the visibilities into arrays (per IF, per baseline, per stokes,
-# per timeperpage) and match the flag array to the visibility array if one is present
-# before saving (with numpy.save) this array into the picklepath directory...
+# per timeperpage) but saving these straight to the hard disk by the use of PyTables, 
+# this is in order to be memory inexpensive
 # THIRD - it will read in the numpy arrays in parrallel, collating each IF together
 # into an array fit for one spplot page, and physically spplot each page using matlibplot
 # routines within the makespplot function.
@@ -26,25 +26,26 @@
 # the sources you wish to plot (it will plot them all in time order).  
 
 AIPS.userno = 8020           	            # The AIPS user number the data is on.
-Name = 'ALLCALS'             	            # The uvdata name of the catalogue.
+Name = 'J2007+404'             	            # The uvdata name of the catalogue.
 Klass = 'UVDATA'                          # The uvdata klass of the catalogue.
 Disk = 1                                  # The uvdata disk number of the catalogue (integer).
 Seq = 1
 
 
-path2folder = '/import/cobrasarchive1/red/jmorford/spplottesting/spplots/'
-                                          # Choose output directory for your plots to be stored. 
+path2folder = '/home/Desktop/'
+
+                                          # Choose output directory for your plots to be stored.
 
 picklepath = str(path2folder)+'picklefiles'
                                           # Choose output directory for your pickled dictionaries to be stored.
 
-choosesources = 'all'		                  # Please select either 'all' or 'choose'
+choosesources = 'all'		           # Please select either 'all' or 'choose'
 
-specifysources = ['J2007+404']	          # Must be strings in python list format.
+specifysources = ['1331+305']	          # Must be strings in python list format.
 
 choosebaselines = 'choose'	                  # Please select either 'all' or 'choose'
 
-baselines = ['6-8','6-9','7-8','8-9']     # Specify your baselines in the format ['1-2','5-6','7-8',etc]
+baselines = ['1-5','6-9']     # Specify your baselines in the format ['1-2','5-6','7-8',etc]
                                           # NB: if 5 baselines or fewer are chosen the program will UVCOP 
                                           # the dataset for your chosen baselines - this is intended to save 
                                           # time when appending the visibilities into the memory. If more than 
@@ -52,21 +53,21 @@ baselines = ['6-8','6-9','7-8','8-9']     # Specify your baselines in the format
                                           # baselines will be read into the memory and pickled into a pickle file.
 
 
-outfilename = 'phasecal'      	    # This is the base name of your output plots.
+outfilename = 'MySPPlot'      	    # This is the base name of your output plots.
 
 
-stokes = ['RR', 'LL']		                  # Must be strings seperated by commas!
+stokes = ['RR','LL']		                  # Must be strings seperated by commas!
 
 
-timerange = ['1 23 40 0', '2 1 00 00']
-#timerange = []                           # Please select the timerange you wish to plot - e.g. a list of two strings
+timerange = ['1 21 34 0', '1 21 45 30']
+timerang = []                             # Please select the timerange you wish to plot - e.g. a list of two strings
                                           #  1st being start time, 2nd being the end time
                                           # e.g. ['0 4 30 5', '0 8 54 57'] i.e. each string = 'day hour min sec'
                                           # To plot all times, leave the timerange list empty!
 
-# Plotting Options:
+### Plotting Options:
 
-scale = 'linear'	         	              # Choose whether to scale the amplitudes linearly ('linear'), 
+scale = 'log'	         	              # Choose whether to scale the amplitudes linearly ('linear'), 
                                           # logarithmically ('log') or min/max within 3 std of mean ('std') - 
                                           # a log scale may show greater detail if the differences in min and max 
                                           # amplitudes are very large. If 'std' is chosen, the max and min amplitudes 
@@ -91,25 +92,32 @@ colourscheme = 'jet'                      # This allows you to choose the colour
 amporphas = 'A'			                      # Specify your plots to display either amplitude: 'A' or phase: 'P'. 
                                           # PLEASE DONT SET 'P' WITH SCALE = 'LOG'! It will fail...
 
-timeperpage = 2000		                    # Set the amount of visibilities to use per page - i.e. the amount of time 
+timeperpage = 3000		                    # Set the amount of visibilities to use per page - i.e. the amount of time 
                                           # (y-axis) to squeeze onto a sheet of A4. Something between 1000-2000 is reasonable.
 
-IF = 8				                            # How many IFs are present in your dataset i.e. for e-Merlin L-Band = 8, C-Band = 16.
+yaxisticks = 'tickperpage'                # Choose either i) 'tickperpage' y axis labelled every tickperpage or ii) 'scans' - 
+                                          # y-axis labelled every scan (NB each scan will be segregated by a solid black line)
+ticksperpage = 6                          # Choose the number of y axis labels & ticks per page (if yaxisticks = 'tickperpage')
 
-IF_start = 1 			                        # Choose starting IF to plot.
-IF_end = 8			                          # Choose last IF to plot.
+IF = 8		                            # How many IFs are present in your dataset i.e. for e-Merlin L-Band = 8, C-Band = 16.
+IF_start = 1 			              # Choose starting IF to plot.
+IF_end = 8			              # Choose last IF to plot.
 
-
-makecombinedplot = 'yes'                  # If 'yes' SPPlot will make thumbnail like .png files of each page and plot them all 
+makecombinedplot = 'no'                  # If 'yes' SPPlot will make thumbnail like .png files of each page and plot them all 
                                           # onto one single page!
 
 onlyplotcombined = 'no'                   # If 'yes' SPPlot will bypass the rest of the makespecplot function to only create
                                           # the combined plot this will speed things up!
                                           # NB: if 'no' and makecombined plot = 'no' - nothing will be plotted.
 
-do_loadflag = 'yes'                        # Choose to apply previous flag tables to the data before flagging
+outputsingle_pngs = 'no'                  # Choose 'yes' to save each page (if onlyplotcombined = 'no') as a png file
+
+pngbbox_inches = 'none'                   # Choose 'tight' such that the .png files have miminal white space (good for figures)
+                                          # Choose 'none' for normal format...
+
+do_loadflag = 'no'                        # Choose to apply previous flag tables to the data before flagging
                                           # Options are 'yes' (load tables specified in flag_tables) or 
                                           # 'no' (don't load any flag tables)
 
-flag_tables = [2]                         # Give a comma-separated list of flag tables to load if you wish to load
+flag_tables = [1]                         # Give a comma-separated list of flag tables to load if you wish to load
                                           # more than one at once... e.g. [1,2]
