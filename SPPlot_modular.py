@@ -49,7 +49,7 @@ import sys
 import cPickle as pkle
 import os.path
 import multiprocessing as mp
-import collections
+import collections, platform
 
 from AIPS import AIPS, AIPSDisk
 from AIPSTask import AIPSTask, AIPSList
@@ -138,16 +138,29 @@ def SPPlot(Name, Klass, Disk, Seq, path2folder, picklepath, IF, IF_start, IF_end
 	def mergepdfs(listtomerge):
 
 		mergedfile = outfilename+'.pdf'
+		if platform.system() == 'Linux':
+			print 'Linux detected using ghostscipt to merge'
+			if len(listtomerge) > 1 and len(listtomerge) < 3:
+				first = str(listtomerge[1])
+				second = str(listtomerge[0])
+				os.system('gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile='+str(path2folder+mergedfile)+' '+str(path2folder+first)+' '+str(path2folder+second))
+				os.remove(path2folder+first)
+				os.remove(path2folder+second)
+				print "\nMerge Completed --> "+str(path2folder+mergedfile)
 
-		if len(listtomerge) > 1 and len(listtomerge) < 3:
-			first = str(listtomerge[1])
-			second = str(listtomerge[0])
-			os.system('gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile='+str(path2folder+mergedfile)+' '+str(path2folder+first)+' '+str(path2folder+second))
+		elif platform.system() == 'darwin':
+			print 'Mac OSX detected - using quick merge'
+			if len(listtomerge) > 1 and len(listtomerge) < 3:
+				first = str(listtomerge[1])
+				second = str(listtomerge[0])
+				os.system('"/System/Library/Automator/Combine PDF Pages.action/Contents/Resources/join.py" -o '+str(path2folder+mergedfile)+' '+str(path2folder+first)+' '+str(path2folder+second))
+				os.remove(path2folder+first)
+				os.remove(path2folder+second)
+				print "\nMerge Completed --> "+str(path2folder+mergedfile)
 
-			os.remove(path2folder+first)
-			os.remove(path2folder+second)
+		else:
+			print 'Not merging files'
 
-			print "\nMerge Completed --> "+str(path2folder+mergedfile)
 
 		if len(listtomerge) > 2:
 			listtomerge2 = []
@@ -157,14 +170,24 @@ def SPPlot(Name, Klass, Disk, Seq, path2folder, picklepath, IF, IF_start, IF_end
 				#listtomerge2 = listtomerge2[::-1] # this just reverses the list, puts the pages in reverse order
 
 				mystring2 = ' '.join(listtomerge2)
-
 			#print "MYSTRING2:",mystring2
-			os.system('gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile='+str(path2folder+mergedfile)+' '+str(mystring2))
+			if platform.system() == 'Linux':
+				print 'Linux detected using ghostscipt to merge'
+				os.system('gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile='+str(path2folder+mergedfile)+' '+str(mystring2))
 
-			for i in xrange(len(listtomerge)):
-				os.remove(path2folder+listtomerge[i])
+				for i in xrange(len(listtomerge)):
+					os.remove(path2folder+listtomerge[i])
 
-			print "\nMerge Completed --> "+str(path2folder+mergedfile)
+				print "\nMerge Completed --> "+str(path2folder+mergedfile)
+
+			elif platform.system() == 'darwin':
+				print 'Mac OSX detected - using quick merge'
+				os.system('"/System/Library/Automator/Combine PDF Pages.action/Contents/Resources/join.py" -o '+str(path2folder+mergedfile)+' '+str(mystring2))
+
+				for i in xrange(len(listtomerge)):
+					os.remove(path2folder+listtomerge[i])
+
+					print "\nMerge Completed --> "+str(path2folder+mergedfile)
 
 		if len(listtomerge) == 1:
 			print "\nNo merging required - only one plotfile"
