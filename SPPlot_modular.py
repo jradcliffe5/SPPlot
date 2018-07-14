@@ -146,17 +146,17 @@ def SPPlot(Name, Klass, Disk, Seq, path2folder, picklepath, IF, IF_start, IF_end
 				os.system('gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile='+str(path2folder+mergedfile)+' '+str(path2folder+first)+' '+str(path2folder+second))
 				os.remove(path2folder+first)
 				os.remove(path2folder+second)
-				print "\nMerge Completed --> "+str(path2folder+mergedfile)
+			print "\nMerge Completed --> "+str(path2folder+mergedfile)
 
-		elif platform.system() == 'darwin':
+		elif platform.system() == 'Darwin':
 			print 'Mac OSX detected - using quick merge'
 			if len(listtomerge) > 1 and len(listtomerge) < 3:
 				first = str(listtomerge[1])
 				second = str(listtomerge[0])
-				os.system('"/System/Library/Automator/Combine PDF Pages.action/Contents/Resources/join.py" -o '+str(path2folder+mergedfile)+' '+str(path2folder+first)+' '+str(path2folder+second))
+				os.system('\"/System/Library/Automator/Combine PDF Pages.action/Contents/Resources/join.py\" -o '+str(path2folder+mergedfile)+' '+str(path2folder+first)+' '+str(path2folder+second))
 				os.remove(path2folder+first)
 				os.remove(path2folder+second)
-				print "\nMerge Completed --> "+str(path2folder+mergedfile)
+			print "\nMerge Completed --> "+str(path2folder+mergedfile)
 
 		else:
 			print 'Not merging files'
@@ -180,14 +180,16 @@ def SPPlot(Name, Klass, Disk, Seq, path2folder, picklepath, IF, IF_start, IF_end
 
 				print "\nMerge Completed --> "+str(path2folder+mergedfile)
 
-			elif platform.system() == 'darwin':
+			elif platform.system() == 'Darwin':
 				print 'Mac OSX detected - using quick merge'
-				os.system('"/System/Library/Automator/Combine PDF Pages.action/Contents/Resources/join.py" -o '+str(path2folder+mergedfile)+' '+str(mystring2))
+				os.system('\"/System/Library/Automator/Combine PDF Pages.action/Contents/Resources/join.py\" -o '+str(path2folder+mergedfile)+' '+str(mystring2))
 
 				for i in xrange(len(listtomerge)):
 					os.remove(path2folder+listtomerge[i])
 
-					print "\nMerge Completed --> "+str(path2folder+mergedfile)
+				print "\nMerge Completed --> "+str(path2folder+mergedfile)
+			else:
+				print 'Not merging files'
 
 		if len(listtomerge) == 1:
 			print "\nNo merging required - only one plotfile"
