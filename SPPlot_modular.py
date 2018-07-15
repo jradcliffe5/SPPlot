@@ -1177,11 +1177,16 @@ def SPPlot(Name, Klass, Disk, Seq, path2folder, picklepath, IF, IF_start, IF_end
 						cbarimage = tmp.imshow(thisarray[IFs-1],aspect='auto',interpolation='nearest',origin='lower',cmap=cmapchoice,vmin=vvmin[count-1], vmax=vvmax[count-1])
 
 					if scale == 'log' and scale_over_all_IFs == 'yes':
-						cbarimage = tmp.imshow(thisarray[IFs-1],aspect='auto',interpolation='nearest',origin='lower',cmap=cmapchoice,norm=LogNorm(vmin=minvalueallifs, vmax=maxvalueallifs))
+						try:
+							cbarimage = tmp.imshow(thisarray[IFs-1],aspect='auto',interpolation='nearest',origin='lower',cmap=cmapchoice,norm=LogNorm(vmin=minvalueallifs, vmax=maxvalueallifs))
+						except RuntimeWarning:
+							cbarimage = tmp.imshow(thisarray[IFs-1],aspect='auto',interpolation='nearest',origin='lower',cmap=cmapchoice,vmin=minvalueallifs, vmax=maxvalueallifs)
 
 					if scale == 'log' and scale_over_all_IFs == 'no':
-						cbarimage = tmp.imshow(thisarray[IFs-1],aspect='auto',interpolation='nearest',origin='lower',cmap=cmapchoice,norm=LogNorm(vmin=minim[count-1], vmax=maxim[count-1]))
-
+						try:
+							cbarimage = tmp.imshow(thisarray[IFs-1],aspect='auto',interpolation='nearest',origin='lower',cmap=cmapchoice,norm=LogNorm(vmin=minim[count-1], vmax=maxim[count-1]))
+						except RuntimeWarning:
+							cbarimage = tmp.imshow(thisarray[IFs-1],aspect='auto',interpolation='nearest',origin='lower',cmap=cmapchoice,vmin=vvmin[count-1], vmax=vvmax[count-1])
 					if scale == 'linear' and scale_over_all_IFs == 'yes':
 						cbarimage = tmp.imshow(thisarray[IFs-1],aspect='auto',interpolation='nearest',origin='lower',cmap=cmapchoice,vmin=minvalueallifs, vmax=maxvalueallifs)
 
